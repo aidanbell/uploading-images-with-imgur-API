@@ -11,17 +11,18 @@ function base64_encode(file) {
 }
 
 function upload(req, res, next) {
-  let image = base64_encode(req.files.image.file);
+  console.log(req.file)
+  let image = base64_encode(req.file.path);
 
   const options = {
-    method: 'POST',
-    url: 'https://api.imgur.com/3/image',
+    method: "POST",
+    url: "https://api.imgur.com/3/image",
     headers: {
-      Authorization: `Client-ID ${process.env.CLIENT_ID}`,
+      Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
     },
     formData: {
       image: image,
-      type: 'base64'
+      type: "base64",
     },
   };
 
@@ -31,7 +32,11 @@ function upload(req, res, next) {
     console.log(body)
     // Mongoose query here to save to db
     // body.data.link points to imgur url
-    res.render('new', { data: body.data })
+    fs.unlink(req.file.path, function(err) {
+      if (err) return console.log(err)
+      let link = body.data
+      res.render('new', { link })
+    })
   })
 }
 
